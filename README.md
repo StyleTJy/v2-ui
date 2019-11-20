@@ -34,9 +34,9 @@ python v2-ui.py [ resetconfig | resetuser | setport | addnode address remark | d
 
 `pyinstaller v2-ui.spec` 
 
-`pyinstaller node.py`
+`pyinstaller v2-node.py`
 
-`cp node.sevice dist/node/`
+`cp v2-node.service dist/node/`
 
 ## 新增功能
 
