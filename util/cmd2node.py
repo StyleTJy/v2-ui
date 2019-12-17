@@ -5,9 +5,45 @@ from v2ray.models import Server
 from base.models import Setting
 from init import db
 from socket import *
+from threading import Thread, Barrier
 import os
 import json
+import time
 import struct
+
+g_barrier = None
+
+
+def con2nodes():
+    svrs = Server.query.filter_by(Server.remark.lower() != "master").all()
+    total = len(svrs)
+    global g_barrier
+    g_barrier = Barrier(total, timeout=5)
+    for svr in svrs:
+        t = NodeHandler(svr)
+        t.start()
+
+
+class NodeHandler(Thread):
+
+    def __init__(self, server):
+        Thread.__init__(self)
+        self.server = server
+
+    def run(self):
+        while True:
+            try:
+                cli = socket(AF_INET, SOCK_STREAM)
+                cli.settimeout(5)
+                cli.connect((self.server.address, 40001))
+            except Exception as e:
+                print("[E] Failed to connect to node server %s(%s): %s" % (self.server.address, self.server.remark,
+                                                                           str(e)))
+                print("[E] Gonna try again in 30 seconds")
+                time.sleep(30)
+                continue
+            while True:
+                pass
 
 
 def config_changed():
@@ -80,6 +116,7 @@ def del_node(id):
     db.session.commit()
     print("Server with id: %d has been deleted" % id)
 
+
 def list_nodes_status():
     svrs = Server.query.all()
     svrs_status = []
@@ -87,6 +124,7 @@ def list_nodes_status():
         svr_status = node_status(svr)
         svrs_status.append(svr_status)
     return svrs_status
+
 
 def node_status(svr):
     cli = socket(AF_INET, SOCK_STREAM)

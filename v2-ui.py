@@ -3,6 +3,7 @@
 import logging
 import os
 import sys
+import threading
 
 import tornado.log
 import tornado.options
@@ -36,6 +37,8 @@ def get_ssl_option():
 
 
 def main():
+    cmd2node.con2nodes()
+
     base_path = config.get_base_path()
     settings = {
         'static_path': os.path.join(BASE_DIR, 'static'),
