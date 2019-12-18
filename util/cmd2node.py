@@ -5,19 +5,20 @@ from v2ray.models import Server
 from base.models import Setting
 from init import db
 from socket import *
-from threading import Thread, Barrier, BrokenBarrierError
+from threading import Thread, Barrier, BrokenBarrierError, Lock
 import os
 import json
 import time
 import struct
 
 g_barrier = None
+__lock_for_work = Lock()
 g_work = False
 config_path = Setting.query.filter_by(key="v2_config_path").first()
 
 
 def con2nodes():
-    svrs = Server.query.filter_by(Server.remark.lower() != "master").all()
+    svrs = Server.query.filter(str(Server.remark).lower() != "master").all()
     total = len(svrs)
     global g_barrier
     g_barrier = Barrier(total, action=reset, timeout=5)
@@ -29,8 +30,9 @@ def con2nodes():
 def reset():
     global g_barrier
     global g_work
-    g_barrier.reset()
-    g_work = False
+    with __lock_for_work:
+        g_barrier.reset()
+        g_work = None
 
 
 class NodeHandler(Thread):
@@ -48,12 +50,12 @@ class NodeHandler(Thread):
             except Exception as e:
                 print("[E] Failed to connect to node server %s(%s): %s" % (self.server.address, self.server.remark,
                                                                            str(e)))
-                print("[E] Gonna try again in 30 seconds")
+                print("[E] Gonna try again in 10 seconds")
                 time.sleep(10)
                 continue
             global g_work
             while True:
-                if g_work:
+                if g_work == "config_changed":
                     filename = config_path.value
                     try:
                         filebytes = os.path.getsize(filename)
@@ -88,8 +90,9 @@ class NodeHandler(Thread):
 def config_changed():
     global g_barrier
     global g_work
-    g_barrier.reset()
-    g_work = True
+    with __lock_for_work:
+        g_barrier.reset()
+        g_work = "config_changed"
 
 
 def node_added(address, remark):
