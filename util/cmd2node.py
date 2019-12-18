@@ -5,23 +5,32 @@ from v2ray.models import Server
 from base.models import Setting
 from init import db
 from socket import *
-from threading import Thread, Barrier
+from threading import Thread, Barrier, BrokenBarrierError
 import os
 import json
 import time
 import struct
 
 g_barrier = None
+g_work = False
+config_path = Setting.query.filter_by(key="v2_config_path").first()
 
 
 def con2nodes():
     svrs = Server.query.filter_by(Server.remark.lower() != "master").all()
     total = len(svrs)
     global g_barrier
-    g_barrier = Barrier(total, timeout=5)
+    g_barrier = Barrier(total, action=reset, timeout=5)
     for svr in svrs:
         t = NodeHandler(svr)
         t.start()
+
+
+def reset():
+    global g_barrier
+    global g_work
+    g_barrier.reset()
+    g_work = False
 
 
 class NodeHandler(Thread):
@@ -40,44 +49,47 @@ class NodeHandler(Thread):
                 print("[E] Failed to connect to node server %s(%s): %s" % (self.server.address, self.server.remark,
                                                                            str(e)))
                 print("[E] Gonna try again in 30 seconds")
-                time.sleep(30)
+                time.sleep(10)
                 continue
+            global g_work
             while True:
-                pass
+                if g_work:
+                    filename = config_path.value
+                    try:
+                        filebytes = os.path.getsize(filename)
+                    except OSError as e:
+                        print("[E] Fatal error: get size of %s failed[%s]" % (filename, str(e)))
+                        exit(1)
+                    header = {
+                        "command": "config_changed",
+                        "filename": filename,
+                        "filesize": filebytes
+                    }
+                    header = json.dumps(header)
+                    header_len = struct.pack('i', len(header))
+                    try:
+                        cli.send(header_len)
+                        cli.send(header.encode("utf-8"))
+                        with open(filename, "rb") as f:
+                            data = f.read()
+                            cli.sendall(data)
+                    except InterruptedError as e:
+                        print("[E] Sending config file failed: %s" % str(e))
+                        cli.close()
+                        break
+                    try:
+                        g_barrier.wait()
+                    except BrokenBarrierError as e:
+                        continue
+                else:
+                    time.sleep(10)
 
 
 def config_changed():
-    svrs = Server.query.all()
-    config_path = Setting.query.filter_by(key="v2_config_path").first()
-    total = len(svrs)
-    suc = 0
-    for svr in svrs:
-        cli = socket(AF_INET, SOCK_STREAM)
-        cli.settimeout(5)
-        print("[I] Ready to send config file to server: %s(%s)..." % (svr.address, svr.remark))
-        try:
-            cli.connect((svr.address, 40001))
-        except Exception as e:
-            print('[E] Send config file to server [%s] failed: %s' % (svr.remark, str(e)))
-            continue
-        filename = config_path.value
-        filebytes = os.path.getsize(filename)
-        header = {
-            "command": "config_changed",
-            "filename": filename,
-            "filesize": filebytes
-        }
-        header = json.dumps(header)
-        header_len = struct.pack('i', len(header))
-        cli.send(header_len)
-        cli.send(header.encode("utf-8"))
-        with open(filename, "rb") as f:
-            data = f.read()
-            cli.sendall(data)
-        print("[I] Send config file to server [%s] success." % svr.remark)
-        cli.close()
-        suc += 1
-    print("[I] %d/%d successfully synced." % (suc, total))
+    global g_barrier
+    global g_work
+    g_barrier.reset()
+    g_work = True
 
 
 def node_added(address, remark):
