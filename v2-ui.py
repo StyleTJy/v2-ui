@@ -3,8 +3,7 @@
 import logging
 import os
 import sys
-import threading
-
+import time
 import tornado.log
 import tornado.options
 from tornado import web, wsgi
@@ -37,7 +36,10 @@ def get_ssl_option():
 
 
 def main():
-    cmd2node.con2nodes()
+    cmd2node.__cmd2node_init__()
+    while True:
+        cmd2node.node_status()
+        time.sleep(5)
 
     base_path = config.get_base_path()
     settings = {

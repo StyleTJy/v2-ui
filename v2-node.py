@@ -7,26 +7,33 @@
 """
 
 from socket import *
+from threading import *
+from util import schedule_util, server_info
 import json
 import struct
 import logging
-#from util import node_info
-from util.schedule_util import start_schedule
 import subprocess
+
+
+def handle_idle_packet(conn, addr):
+    logging.error("[I] Received from %s: %s" % addr)
+    while True:
+        try:
+            header_len = ntohl(struct.unpack('i', conn.recv(4))[0])
+            if header_len <= 0:
+                logging.debug("[D] Received idle packet")
+            else:
+                logging.error("[D] Unexpected data received")
+                conn.recv(header_len)
+        except Exception as e:
+            logging.error("[E] Recv failed: %s" % str(e))
+            conn.close()
+            break
 
 
 def node_added(conn_socket):
     logging.debug("[I] Handling node added...")
     conn_socket.send("ack".encode("utf-8"))
-
-
-#def node_state(conn_socket):
-#    logging.debug("[I] Handling node state...")
-#    data = json.dumps(node_info.get_status())
-#    print(data)
-#    data_len = struct.pack('i', len(data))
-#    conn.send(data_len)
-#    conn_socket.sendall(data.encode("utf-8"))
 
 
 def config_changed(conn_socket, filesize):
@@ -57,11 +64,11 @@ def config_changed(conn_socket, filesize):
 
 
 if __name__ == "__main__":
-    start_schedule()
     logging.basicConfig(filename='/etc/v2-node/v2-node.log',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         format='%(asctime)s-%(name)s-%(levelname)s-%(message)s',
-                        level=logging.ERROR)
+                        level=logging.DEBUG)
+    schedule_util.start_schedule()
     svr = socket(AF_INET, SOCK_STREAM)
     try:
         svr.bind(("0.0.0.0", 40001))
@@ -73,11 +80,19 @@ if __name__ == "__main__":
     while True:
         try:
             conn, addr = svr.accept()
-            logging.debug("[I] Received connection from: %s:%d" % addr)
+            logging.debug("[D] Received connection from: %s:%d" % addr)
             header_len = conn.recv(4)
             if header_len:
-                logging.debug("[I] Ready to receive data.")
-            header_len = struct.unpack('i', header_len)[0]
+                logging.debug("[D] Ready to receive data.")
+            else:
+                logging.error("[E] No data received.")
+                continue
+            header_len = ntohl(struct.unpack('i', header_len)[0])
+            if header_len <= 0:
+                logging.debug("[D] Received idle packet")
+                t = Thread(target=handle_idle_packet, args=(conn, addr))
+                t.start()
+                continue
             data = conn.recv(header_len).decode("utf-8")
             data = json.loads(data)
             if data:
@@ -87,14 +102,19 @@ if __name__ == "__main__":
                 elif cmd == "config_changed":
                     config_changed(conn, data["filesize"])
                 elif cmd == "node_status":
-                   # node_state(conn)
-                    pass
+                    print(cmd)
+                    status = server_info.get_status()
+                    data = json.dumps(status)
+                    data_len = struct.pack("i", htonl(len(data)))
+                    conn.send(data_len)
+                    conn.send(data.encode("utf-8"))
                 else:
                     logging.error("[E] Unsupported command: %s." % cmd)
             else:
                 logging.error("[E] No data received.")
             conn.close()
         except KeyboardInterrupt as e:
+            svr.close()
             break
         except Exception as e:
             logging.error("[E] Catches exceptions: %s " % str(e))
