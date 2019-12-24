@@ -12,6 +12,7 @@ import os
 import json
 import time
 import struct
+import logging
 
 
 class Con2NodesMan:
@@ -33,32 +34,31 @@ class Con2NodesMan:
             self._socket = socket(AF_INET, SOCK_STREAM)
             self._socket.settimeout(5)
             self._socket.connect((self._server.address, 40001))
+            self._isConnecting = True
+            logging.error("[I] Success to connect to node server %s(%s)" % (self._server.address, self._server.remark))
+            idle_packet = struct.pack("!i", 0)
+            self._socket.send(idle_packet)
         except Exception as e:
-            print("[E] Failed to connect to node server %s(%s): %s" % (self._server.address, self._server.remark,
-                                                                       str(e)))
+            logging.error("[E] Failed to connect to node server %s(%s): %s" % (self._server.address,
+                                                                               self._server.remark, str(e)))
             self._isConnecting = False
-            return False
-        self._isConnecting = True
-        print("[I] Success to connect to node server %s(%s)" % (self._server.address, self._server.remark))
-        return True
+        finally:
+            return self._isConnecting
 
     def maintain(self):
-        idle_packet = struct.pack("i", 0)
+        idle_packet = struct.pack("!i", 0)
         while True:
             time.sleep(30)
             with self._lock4socket:
-                if self._socket is None:
-                    if not self.connect():  # 连接出现问题，下次再尝试
-                        continue
-                print("[E] %s sending idle packet..." % str(self._server.remark))
                 try:
                     if self._isConnecting:
+                        logging.debug("[D] %s sending idle packet..." % str(self._server.remark))
                         self._socket.send(idle_packet)
                     else:
-                        print("[E] %s reconnecting..." % str(self._server.remark))
+                        logging.debug("[D] %s reconnecting..." % str(self._server.remark))
                         if not self.connect():
                             time.sleep(30)
-                            continue
+                            continue # 重连失败，下次再试
                 except Exception as e:
                     print("[E] %s send idle packet failed: %s" % (str(self._server.remark), str(e)))
                     self._isConnecting = False
@@ -66,13 +66,13 @@ class Con2NodesMan:
 
     def send_header(self, header):
         header = json.dumps(header).encode("utf-8")
-        header_len = struct.pack('i', htonl(len(header)))
+        header_len = struct.pack('!i', len(header))
         self._socket.send(header_len)
         self._socket.send(header)
 
     def recv_data(self):
         data_len = self._socket.recv(4)
-        data_len = ntohl(struct.unpack("i", data_len)[0])
+        data_len = struct.unpack("!i", data_len)[0]
         if data_len > 0:
             recv_len = 0
             data = b''
@@ -138,7 +138,7 @@ def __cmd2node_init__():
             maintainers.submit(nodes[svr.id].maintain)
         initialized = True
     except Exception as e:
-        print("[E] Initialization failed: %s" % str(e))
+        logging.error("[E] Initialization failed: %s" % str(e))
         initialized = False
     finally:
         return initialized
@@ -166,7 +166,7 @@ def node_added(address, remark):
         return -1
     header = {"command": "node_added"}
     header = json.dumps(header)
-    header_len = struct.pack('i', len(header))
+    header_len = struct.pack('!i', len(header))
     cli.send(header_len)
     cli.send(header.encode("utf-8"))
     data = cli.recv(1024).decode("utf-8")

@@ -15,20 +15,48 @@ import logging
 import subprocess
 
 
-def handle_idle_packet(conn, addr):
+def handle_data(conn, data):
+    data = json.loads(data)
+    if data:
+        cmd = data["command"]
+        if cmd == "node_added":
+            node_added(conn)
+        elif cmd == "config_changed":
+            config_changed(conn, data["filesize"])
+        elif cmd == "node_status":
+            try:
+                status = server_info.get_status()
+                data = json.dumps(status).encode("utf-8")
+                data_len = struct.pack("!i", len(data))
+                logging.error(data_len)
+                logging.error(data)
+                conn.sendall(data_len)
+                conn.sendall(data)
+            except Exception as e:
+                logging.error("node status send data failed [%s]" % str(e))
+        else:
+            logging.error("[E] Unsupported command: %s." % cmd)
+    else:
+        logging.error("[E] No data received.")
+
+
+def handle_persistent_connection(conn, addr):
     logging.error("[I] Received from %s: %s" % addr)
     while True:
         try:
-            header_len = ntohl(struct.unpack('i', conn.recv(4))[0])
+            header_len = struct.unpack('!i', conn.recv(4))[0]
             if header_len <= 0:
                 logging.debug("[D] Received idle packet")
             else:
-                logging.error("[D] Unexpected data received")
-                conn.recv(header_len)
-        except Exception as e:
-            logging.error("[E] Recv failed: %s" % str(e))
+                header = conn.recv(header_len).decode("utf-8")
+                handle_data(conn, header)
+        except OSError as e:
+            logging.error("[E] socket error: %s" % str(e))
             conn.close()
             break
+        except Exception as e:
+            logging.error("[E] Recv %d bytes data failed: %s" % (header_len, str(e)))
+            continue
 
 
 def node_added(conn_socket):
@@ -51,14 +79,15 @@ def config_changed(conn_socket, filesize):
     code = -100
     try:
         p = subprocess.Popen("service v2ray restart", shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        code = p.wait()
+        result = p.communicate()
+        code = p.returncode
         if code != 0:
-            logging.debug(p.stdout.read().decode('utf-8'), code)
-        result = p.stdout.read()
-        logging.debug("[I] %s" % result.decode('utf-8'))
-        logging.debug("[I] Successfully started.")
+            logging.error("[E] Failed in restart v2ray.")
+        else:
+            logging.debug("[I] Successfully started.")
+        logging.debug("%s %s" % (result[0], result[1]))
     except Exception as e:
-        logging.error(str(e), code)
+        logging.error("[E] %s" % str(e))
     finally:
         logging.debug("[I] Done.")
 
@@ -73,7 +102,7 @@ if __name__ == "__main__":
     try:
         svr.bind(("0.0.0.0", 40001))
     except OSError as e:
-        svr.setsockopt(SOL_SOCKET, SO_REUSEPORT)
+        svr.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
         svr.bind(("0.0.0.0", 40001))
     svr.listen(5)
     logging.error("[I] Listening on 40001...")
@@ -87,31 +116,15 @@ if __name__ == "__main__":
             else:
                 logging.error("[E] No data received.")
                 continue
-            header_len = ntohl(struct.unpack('i', header_len)[0])
-            if header_len <= 0:
-                logging.debug("[D] Received idle packet")
-                t = Thread(target=handle_idle_packet, args=(conn, addr))
+            header_len = struct.unpack('!i', header_len)[0]
+            if header_len <= 0: # 处理长连接
+                logging.debug("[D] Received idle packet, ready to establish persistent connection.")
+                t = Thread(target=handle_persistent_connection, args=(conn, addr))
                 t.start()
                 continue
+            # 处理单次连接
             data = conn.recv(header_len).decode("utf-8")
-            data = json.loads(data)
-            if data:
-                cmd = data["command"]
-                if cmd == "node_added":
-                    node_added(conn)
-                elif cmd == "config_changed":
-                    config_changed(conn, data["filesize"])
-                elif cmd == "node_status":
-                    print(cmd)
-                    status = server_info.get_status()
-                    data = json.dumps(status)
-                    data_len = struct.pack("i", htonl(len(data)))
-                    conn.send(data_len)
-                    conn.send(data.encode("utf-8"))
-                else:
-                    logging.error("[E] Unsupported command: %s." % cmd)
-            else:
-                logging.error("[E] No data received.")
+            handle_data(conn, data)
             conn.close()
         except KeyboardInterrupt as e:
             svr.close()

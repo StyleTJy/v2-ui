@@ -18,7 +18,7 @@ def logging_init():
     logging.basicConfig(filename='/etc/v2-ui/v2-ui.log',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         format='%(asctime)s-%(name)s-%(levelname)s-%(message)s',
-                        level=logging.WARN)
+                        level=logging.DEBUG)
     tornado.log.access_log.setLevel('ERROR')
     tornado.log.app_log.setLevel('ERROR')
     tornado.log.gen_log.setLevel('ERROR')
@@ -37,9 +37,6 @@ def get_ssl_option():
 
 def main():
     cmd2node.__cmd2node_init__()
-    while True:
-        cmd2node.node_status()
-        time.sleep(5)
 
     base_path = config.get_base_path()
     settings = {

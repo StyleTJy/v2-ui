@@ -36,7 +36,7 @@ def refresh_status():
             disk()
             loads()
             net()
-        logging.debug(__status)
+        # logging.debug(__status)
     except Exception as e:
         logging.warning('Failed to get system status information: ' + str(e))
 

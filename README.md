@@ -60,6 +60,23 @@ v2-ui syncconfig           - 与节点同步配置文件
 - 主站增加该子节点服务器时，与其进行确认
 - 主站配置文件更新时，通过与监听程序通信传输配置文件
 
+操作：
+
+`service v2-node [ start | stop | restart | status ]`
+
+日志存放目录： `/etc/v2-node`
+
+卸载：
+
+```shell script
+systemctl stop v2-node
+systemctl disable v2-node
+rm /usr/local/v2-node/ -rf
+rm /etc/v2-node/ -rf
+rm /etc/systemd/system/v2-node.service -f
+systemctl daemon-reload
+```
+
 ***
 > 以下为原文
 ***

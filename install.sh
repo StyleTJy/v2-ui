@@ -5,8 +5,6 @@ green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
 
-cur_dir=$(pwd)
-
 # check root
 [[ $EUID -ne 0 ]] && echo -e "${red}错误：${plain} 必须使用root用户运行此脚本！\n" && exit 1
 
@@ -88,20 +86,20 @@ close_firewall() {
 
 install_v2-ui() {
     systemctl stop v2-ui
-    cd /usr/local/
+    cd /usr/local/ || return 1
     if [[ -e /usr/local/v2-ui/ ]]; then
         rm /usr/local/v2-ui/ -rf
     fi
-    last_version=$(curl -Ls "https://api.github.com/repos/690933449/v2-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    last_version=$(curl -Ls "https://api.github.com/repos/StyleTJy/v2-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     echo -e "检测到v2-ui最新版本：${last_version}，开始安装"
-    wget -N --no-check-certificate -O /usr/local/v2-ui-linux.tar.gz https://github.com/690933449/v2-ui/releases/download/${last_version}/v2-ui-linux.tar.gz
+    wget -N --no-check-certificate -O /usr/local/v2-ui-linux.tar.gz https://github.com/StyleTJy/v2-ui/releases/download/${last_version}/v2-ui-linux.tar.gz
     if [[ $? -ne 0 ]]; then
         echo -e "${red}下载v2-ui失败，请确保你的服务器能够下载Github的文件，如果多次安装失败，请参考手动安装教程${plain}"
         exit 1
     fi
     tar zxvf v2-ui-linux.tar.gz
     rm v2-ui-linux.tar.gz -f
-    cd v2-ui
+    cd v2-ui || return 1
     chmod +x v2-ui
     cp -f v2-ui.service /etc/systemd/system/
     systemctl daemon-reload
@@ -114,7 +112,7 @@ install_v2-ui() {
     echo -e ""
     echo -e "如果是更新面板，则按你之前的方式访问面板"
     echo -e ""
-    curl -o /usr/bin/v2-ui -Ls https://raw.githubusercontent.com/690933449/v2-ui/master/v2-ui.sh
+    curl -o /usr/bin/v2-ui -Ls https://raw.githubusercontent.com/StyleTJy/v2-ui/master/v2-ui.sh
     chmod +x /usr/bin/v2-ui
     echo -e "v2-ui 管理脚本使用方法: "
     echo -e "----------------------------------------------"
@@ -136,7 +134,38 @@ install_v2-ui() {
     echo -e "----------------------------------------------"
 }
 
+install_node(){
+    cd /usr/local/ || return 1
+    if [[ -e /usr/local/v2-node/ ]]; then
+        rm /usr/local/v2-node/ -rf
+    fi
+    if [[ ! -e /etc/v2-node ]];then
+        mkdir -p /etc/v2-node
+    fi
+    chmod +rw /etc/v2-node
+    last_version=$(curl -Ls "https://api.github.com/repos/StyleTJy/v2-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    echo -e "检测到v2-ui最新版本：${last_version}，开始安装"
+    wget -N --no-check-certificate -O /usr/local/v2-ui-linux.tar.gz https://github.com/StyleTJy/v2-ui/releases/download/${last_version}/v2-node.tar.gz
+    if [[ $? -ne 0 ]]; then
+        echo -e "${red}下载v2-ui失败，请确保你的服务器能够下载Github的文件，如果多次安装失败，请参考手动安装教程${plain}"
+        exit 1
+    fi
+    tar zxvf v2-node.tar.gz
+    rm v2-node.tar.gz -f
+    cd v2-node || return 1
+    cp -f v2-node.service /etc/systemd/system/
+    systemctl daemon-reload
+    systemctl enable v2-node
+    systemctl start v2-node
+    echo "service v2-node [ start | stop | restart | status ]"
+    echo "log location: /etc/v2-node"
+}
+
 echo -e "${green}开始安装${plain}"
 install_base
 install_v2ray
-install_v2-ui
+if [ x$1 = x"node" ];then
+    install_node
+else
+    install_v2-ui
+fi
