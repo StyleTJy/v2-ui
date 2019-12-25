@@ -6,7 +6,7 @@ from base.models import Setting
 from init import db
 from socket import *
 from threading import Lock
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 
 import os
 import json
@@ -195,21 +195,24 @@ def del_node(id):
 
 
 def list_nodes_status():
-    svrs = Server.query.all()
-    svrs_status = []
-    for i, svr in enumerate(svrs):
-        svr_status = node_status()
-        svrs_status.append(svr_status)
-    return svrs_status
-
-
-def node_status():
     global nodes
+    svrs_status = {}
+    for svr in nodes:
+        svr_status = node_status(svr)
+        svrs_status[svr.id] = svr_status
+        return svrs_status
+
+
+def node_status(svr):
     global executors
     if not initialized:
-        print("[E] Nodes connections are not ready.")
-        return False
-    for k in nodes.keys():
-        if nodes[k].isConnecting:
-            executors.submit(nodes[k].execute, "node_status")
-    return True
+        logging.error("[E] Nodes connections are not ready.")
+        return None
+    if nodes[svr.id].isConnecting:
+        exe = executors.submit(nodes[svr.id].execute, "node_status")
+        try:
+            return exe.result(5)
+        except TimeoutError:
+            return None
+    else:
+        return None

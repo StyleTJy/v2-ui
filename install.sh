@@ -164,7 +164,7 @@ install_node(){
 echo -e "${green}开始安装${plain}"
 install_base
 install_v2ray
-if [ x$1 = x"node" ];then
+if [ x"$1" = x"node" ];then
     install_node
 else
     install_v2-ui

@@ -50,13 +50,14 @@ def handle_persistent_connection(conn, addr):
             else:
                 header = conn.recv(header_len).decode("utf-8")
                 handle_data(conn, header)
+        except struct.error as e :
+            logging.error("[E] struct error: %s" % str(e))
+            conn.close()
+            break
         except OSError as e:
             logging.error("[E] socket error: %s" % str(e))
             conn.close()
             break
-        except Exception as e:
-            logging.error("[E] Recv %d bytes data failed: %s" % (header_len, str(e)))
-            continue
 
 
 def node_added(conn_socket):
@@ -117,7 +118,7 @@ if __name__ == "__main__":
                 logging.error("[E] No data received.")
                 continue
             header_len = struct.unpack('!i', header_len)[0]
-            if header_len <= 0: # 处理长连接
+            if header_len <= 0:  # 处理长连接
                 logging.debug("[D] Received idle packet, ready to establish persistent connection.")
                 t = Thread(target=handle_persistent_connection, args=(conn, addr))
                 t.start()

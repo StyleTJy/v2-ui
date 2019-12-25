@@ -38,6 +38,12 @@ python v2-ui.py [ resetconfig | resetuser | setport | addnode address remark | d
 
 `cp v2-node.service dist/node/`
 
+## 安装
+
+```shell script
+bash <(curl -Ls https://raw.githubusercontent.com/StyleTJy/v2-ui/master/install.sh)
+```
+
 ## 新增功能
 
 ### 面板功能
@@ -60,6 +66,10 @@ v2-ui syncconfig           - 与节点同步配置文件
 - 主站增加该子节点服务器时，与其进行确认
 - 主站配置文件更新时，通过与监听程序通信传输配置文件
 
+安装：
+
+`sh install.sh node`
+
 操作：
 
 `service v2-node [ start | stop | restart | status ]`
@@ -78,7 +88,7 @@ systemctl daemon-reload
 ```
 
 ***
-> 以下为原文
+> 以下为原文，如果要安装本 fork 版本，请执行上述安装
 ***
 
 # 捐赠支持
