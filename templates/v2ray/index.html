@@ -132,22 +132,7 @@
             tcp_count: '..',
             udp_count: '..',
         };
-        let nodesStatus = {
-            v2: {
-                color: '',
-                stat: '{{ _('loading') }}',
-            },
-            uptime: '{{ _('loading') }}',
-            cpu: { percent: 0 },
-            memory: { percent: 0 },
-            disk: { percent: 0 },
-            net_io: { up: '..', down: '..' },
-            net_traffic: { sent: '..', recv: '..' },
-            tcp_count: '..',
-            udp_count: '..',
-            remark: '..',
-            address: '..',
-        };
+        let nodesStatus = [];
         let app = new Vue({
             delimiters: ['[[', ']]'],
             el: '#app',
@@ -195,27 +180,36 @@
                     });
                 },
                 setNodesStatus(nodesStatus) {
-                    this.nodesStatus = nodesStatus.map(nodeStatus => {
-                        switch (nodeStatus.v2.code) {
-                            case 0: nodeStatus.v2.stat = '{{ _('running') }}'; nodeStatus.v2.color = '#67C23A'; break;
-                            case 1: nodeStatus.v2.stat = '{{ _('not running') }}'; nodeStatus.v2.color = '#E6A23C'; break;
-                            default: nodeStatus.v2.stat = '{{ _('error') }}'; nodeStatus.v2.color = '#F56C6C';
+                    for (let key in nodesStatus){
+                        if (nodesStatus[key] === {}) {
+                            nodesStatus[key].v2.code = 2;
+                            continue;
                         }
-                        nodeStatus.remark = nodeStatus.remark;
-                        nodeStatus.address = nodeStatus.address;
-                        nodeStatus.uptime = formatSecond(nodeStatus.uptime);
-                        nodeStatus.cpu.percent = nodeStatus.cpu.percent.toFixed(2);
-                        nodeStatus.memory.percent = (nodeStatus.memory.used / nodeStatus.memory.total * 100).toFixed(2);
-                        nodeStatus.disk.percent = (nodeStatus.disk.used / nodeStatus.disk.total * 100).toFixed(2);
-                        nodeStatus.cpu.color = this.computeColor(nodeStatus.cpu.percent);
-                        nodeStatus.memory.color = this.computeColor(nodeStatus.memory.percent);
-                        nodeStatus.disk.color = this.computeColor(nodeStatus.disk.percent);
-                        nodeStatus.net_io.up = sizeFormat(nodeStatus.net_io.up);
-                        nodeStatus.net_io.down = sizeFormat(nodeStatus.net_io.down);
-                        nodeStatus.net_traffic.sent = sizeFormat(nodeStatus.net_traffic.sent);
-                        nodeStatus.net_traffic.recv = sizeFormat(nodeStatus.net_traffic.recv);
-                        return nodeStatus
-                    }).reverse();
+                        switch (nodesStatus[key].v2.code) {
+                            case 0:
+                                nodesStatus[key].v2.stat = '{{ _('running') }}';
+                                nodesStatus[key].v2.color = '#67C23A';
+                                break;
+                            case 1:
+                                nodesStatus[key].v2.stat = '{{ _('not running') }}';
+                                nodesStatus[key].v2.color = '#E6A23C';
+                                break;
+                            default:
+                                nodesStatus[key].v2.stat = '{{ _('error') }}';
+                                nodesStatus[key].v2.color = '#F56C6C';
+                        }
+                        nodesStatus[key].uptime = formatSecond(nodesStatus[key].uptime);
+                        nodesStatus[key].cpu.percent = nodesStatus[key].cpu.percent.toFixed(2);
+                        nodesStatus[key].memory.percent = (nodesStatus[key].memory.used / nodesStatus[key].memory.total * 100).toFixed(2);
+                        nodesStatus[key].disk.percent = (nodesStatus[key].disk.used / nodesStatus[key].disk.total * 100).toFixed(2);
+                        nodesStatus[key].cpu.color = this.computeColor(nodesStatus[key].cpu.percent);
+                        nodesStatus[key].memory.color = this.computeColor(nodesStatus[key].memory.percent);
+                        nodesStatus[key].disk.color = this.computeColor(nodesStatus[key].disk.percent);
+                        nodesStatus[key].net_io.up = sizeFormat(nodesStatus[key].net_io.up);
+                        nodesStatus[key].net_io.down = sizeFormat(nodesStatus[key].net_io.down);
+                        nodesStatus[key].net_traffic.sent = sizeFormat(nodesStatus[key].net_traffic.sent);
+                        nodesStatus[key].net_traffic.recv = sizeFormat(nodesStatus[key].net_traffic.recv);
+                    }
                 },
                 computeColor(percent) {
                     if (percent < 80) {

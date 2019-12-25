@@ -81,9 +81,9 @@ class Con2NodesMan:
                 data += buf
                 recv_len += len(buf)
             data = data.decode("utf-8")
-            print(data)
+            return data
         else:
-            print("[E] No data received.")
+            return "{}"
 
     def execute(self, cmd):
         global config_path
@@ -109,7 +109,7 @@ class Con2NodesMan:
             elif cmd == "node_status":
                 header = {"command": "node_status"}
                 self.send_header(header)
-                self.recv_data()
+                return self.recv_data()
             else:
                 print("[E] Unsupported command: %s" % cmd)
 
@@ -197,22 +197,21 @@ def del_node(id):
 def list_nodes_status():
     global nodes
     svrs_status = {}
-    for svr in nodes:
-        svr_status = node_status(svr)
-        svrs_status[svr.id] = svr_status
-        return svrs_status
+    for k in nodes.keys():
+        svrs_status[k] = json.loads(node_status(nodes[k]))
+    return svrs_status
 
 
-def node_status(svr):
+def node_status(node):
     global executors
     if not initialized:
         logging.error("[E] Nodes connections are not ready.")
-        return None
-    if nodes[svr.id].isConnecting:
-        exe = executors.submit(nodes[svr.id].execute, "node_status")
+        return "{}"
+    if node.isConnecting:
+        exe = executors.submit(node.execute, "node_status")
         try:
             return exe.result(5)
         except TimeoutError:
-            return None
+            return "{}"
     else:
-        return None
+        return "{}"
