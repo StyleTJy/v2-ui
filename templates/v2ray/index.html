@@ -66,7 +66,7 @@
                     </a-col>
                     <a-col :sm="24" :md="12">
                         <a-card hoverable>
-                            {{ _('uptime') }}：<a-tag color="#87d068">[[ status.uptime ]]</a-tag>
+                            {{ _('uptime') }}：<a-tag :color="status.uptime_color">[[ status.uptime ]]</a-tag>
                         </a-card>
                     </a-col>
                     <a-col :sm="24" :md="12">
@@ -118,23 +118,24 @@
 
         class status {
             constructor() {
-                this.remark = "";
-                this.address = "";
+                this.remark = "unknown";
+                this.address = "unknown";
                 this.v2 = {
                     code: 2,
                     color: '',
-                    stat: '{{ _('loading') }}',
+                    stat: '{{ _('error') }}',
                 };
-                this.uptime = '{{ _('loading') }}';
+                this.uptime = 0;
+                this.uptime_color = '#F56C6C';
                 this.cpu = {percent: 0};
-                this.memory = {percent: 0};
-                this.swap = {percent: 0};
-                this.disk = {percent: 0};
-                this.net_io = {up: '..', down: '..'};
-                this.net_traffic = {sent: '..', recv: '..'};
-                this.loads = ['..', '..', '..'];
-                this.tcp_count = '..';
-                this.udp_count = '..';
+                this.memory = {percent: 0, used: 0, total: 0};
+                this.swap = {percent: 0, used: 0, total: 0};
+                this.disk = {percent: 0, used: 0, total: 0};
+                this.net_io = {up: 0, down: 0};
+                this.net_traffic = {sent: 0, recv: 0};
+                this.loads = [0, 0, 0];
+                this.tcp_count = 0;
+                this.udp_count = 0;
             }
         }
         let app = new Vue({
@@ -159,6 +160,8 @@
                         case 1: status.v2.stat = '{{ _('not running') }}'; status.v2.color = '#E6A23C'; break;
                         default: status.v2.stat = '{{ _('error') }}'; status.v2.color = '#F56C6C';
                     }
+                    if (status.uptime > 0)
+                        status.uptime_color = '#67C23A';
                     status.uptime = formatSecond(status.uptime);
                     status.cpu.percent = status.cpu.percent.toFixed(2);
                     status.memory.percent = (status.memory.used / status.memory.total * 100).toFixed(2);
@@ -207,13 +210,21 @@
                                 tmp.v2.stat = '{{ _('error') }}';
                                 tmp.v2.color = '#F56C6C';
                         }
+                        tmp.remark = nodestatus.remark;
+                        tmp.address = nodestatus.address;
+                        if (nodestatus.uptime > 0)
+                            tmp.uptime_color = '#67C23A';
                         tmp.uptime = formatSecond(nodestatus.uptime);
                         tmp.cpu.percent = nodestatus.cpu.percent.toFixed(2);
+                        tmp.memory.used = nodestatus.memory.used;
+                        tmp.memory.total = nodestatus.memory.total;
                         tmp.memory.percent = (nodestatus.memory.used / nodestatus.memory.total * 100).toFixed(2);
+                        tmp.disk.used = nodestatus.disk.used;
+                        tmp.disk.total = nodestatus.disk.total;
                         tmp.disk.percent = (nodestatus.disk.used / nodestatus.disk.total * 100).toFixed(2);
-                        tmp.cpu.color = this.computeColor(nodestatus.cpu.percent);
-                        tmp.memory.color = this.computeColor(nodestatus.memory.percent);
-                        tmp.disk.color = this.computeColor(nodestatus.disk.percent);
+                        tmp.cpu.color = this.computeColor(tmp.cpu.percent);
+                        tmp.memory.color = this.computeColor(tmp.memory.percent);
+                        tmp.disk.color = this.computeColor(tmp.disk.percent);
                         tmp.net_io.up = sizeFormat(nodestatus.net_io.up);
                         tmp.net_io.down = sizeFormat(nodestatus.net_io.down);
                         tmp.net_traffic.sent = sizeFormat(nodestatus.net_traffic.sent);
