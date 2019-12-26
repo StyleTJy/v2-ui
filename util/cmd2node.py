@@ -29,6 +29,14 @@ class Con2NodesMan:
     def isConnecting(self):
         return self._isConnecting
 
+    @property
+    def remark(self):
+        return self._server.remark
+
+    @property
+    def address(self):
+        return self._server.address
+
     def connect(self):
         try:
             self._socket = socket(AF_INET, SOCK_STREAM)
@@ -196,9 +204,12 @@ def del_node(id):
 
 def list_nodes_status():
     global nodes
-    svrs_status = {}
-    for k in nodes.keys():
-        svrs_status[k] = json.loads(node_status(nodes[k]))
+    svrs_status = []
+    for k in sorted(nodes.keys()):
+        tmp = json.loads(node_status(nodes[k]))
+        tmp["remark"] = nodes[k].remark
+        tmp["address"] = nodes[k].address
+        svrs_status.append(tmp)
     return svrs_status
 
 

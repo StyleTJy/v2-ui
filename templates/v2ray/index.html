@@ -116,28 +116,32 @@
     {{ super() }}
     <script>
 
-        let status = {
-            v2: {
-                color: '',
-                stat: '{{ _('loading') }}',
-            },
-            uptime: '{{ _('loading') }}',
-            cpu: { percent: 0 },
-            memory: { percent: 0 },
-            swap: { percent: 0 },
-            disk: { percent: 0 },
-            net_io: { up: '..', down: '..' },
-            net_traffic: { sent: '..', recv: '..' },
-            loads: ['..', '..', '..'],
-            tcp_count: '..',
-            udp_count: '..',
-        };
-        let nodesStatus = [];
+        class status {
+            constructor() {
+                this.remark = "";
+                this.address = "";
+                this.v2 = {
+                    code: 2,
+                    color: '',
+                    stat: '{{ _('loading') }}',
+                };
+                this.uptime = '{{ _('loading') }}';
+                this.cpu = {percent: 0};
+                this.memory = {percent: 0};
+                this.swap = {percent: 0};
+                this.disk = {percent: 0};
+                this.net_io = {up: '..', down: '..'};
+                this.net_traffic = {sent: '..', recv: '..'};
+                this.loads = ['..', '..', '..'];
+                this.tcp_count = '..';
+                this.udp_count = '..';
+            }
+        }
         let app = new Vue({
             delimiters: ['[[', ']]'],
             el: '#app',
             data: {
-                status: status,
+                status: new status(),
                 nodesStatus: [],
             },
             methods: {
@@ -180,36 +184,42 @@
                     });
                 },
                 setNodesStatus(nodesStatus) {
-                    for (let key in nodesStatus){
-                        if (nodesStatus[key] === {}) {
-                            nodesStatus[key].v2.code = 2;
-                            continue;
+                    this.nodesStatus = nodesStatus.map(nodestatus => {
+                        let tmp = new status();
+                        if (nodestatus.hasOwnProperty("v2") === false){
+                            tmp.v2.code = 2;
+                            tmp.v2.stat = '{{ _('error') }}';
+                            tmp.v2.color = '#F56C6C';
+                            tmp.remark = nodestatus.remark;
+                            tmp.address = nodestatus.address;
+                            return tmp;
                         }
-                        switch (nodesStatus[key].v2.code) {
+                        switch (nodestatus.v2.code) {
                             case 0:
-                                nodesStatus[key].v2.stat = '{{ _('running') }}';
-                                nodesStatus[key].v2.color = '#67C23A';
+                                tmp.v2.stat = '{{ _('running') }}';
+                                tmp.v2.color = '#67C23A';
                                 break;
                             case 1:
-                                nodesStatus[key].v2.stat = '{{ _('not running') }}';
-                                nodesStatus[key].v2.color = '#E6A23C';
+                                tmp.v2.stat = '{{ _('not running') }}';
+                                tmp.v2.color = '#E6A23C';
                                 break;
                             default:
-                                nodesStatus[key].v2.stat = '{{ _('error') }}';
-                                nodesStatus[key].v2.color = '#F56C6C';
+                                tmp.v2.stat = '{{ _('error') }}';
+                                tmp.v2.color = '#F56C6C';
                         }
-                        nodesStatus[key].uptime = formatSecond(nodesStatus[key].uptime);
-                        nodesStatus[key].cpu.percent = nodesStatus[key].cpu.percent.toFixed(2);
-                        nodesStatus[key].memory.percent = (nodesStatus[key].memory.used / nodesStatus[key].memory.total * 100).toFixed(2);
-                        nodesStatus[key].disk.percent = (nodesStatus[key].disk.used / nodesStatus[key].disk.total * 100).toFixed(2);
-                        nodesStatus[key].cpu.color = this.computeColor(nodesStatus[key].cpu.percent);
-                        nodesStatus[key].memory.color = this.computeColor(nodesStatus[key].memory.percent);
-                        nodesStatus[key].disk.color = this.computeColor(nodesStatus[key].disk.percent);
-                        nodesStatus[key].net_io.up = sizeFormat(nodesStatus[key].net_io.up);
-                        nodesStatus[key].net_io.down = sizeFormat(nodesStatus[key].net_io.down);
-                        nodesStatus[key].net_traffic.sent = sizeFormat(nodesStatus[key].net_traffic.sent);
-                        nodesStatus[key].net_traffic.recv = sizeFormat(nodesStatus[key].net_traffic.recv);
-                    }
+                        tmp.uptime = formatSecond(nodestatus.uptime);
+                        tmp.cpu.percent = nodestatus.cpu.percent.toFixed(2);
+                        tmp.memory.percent = (nodestatus.memory.used / nodestatus.memory.total * 100).toFixed(2);
+                        tmp.disk.percent = (nodestatus.disk.used / nodestatus.disk.total * 100).toFixed(2);
+                        tmp.cpu.color = this.computeColor(nodestatus.cpu.percent);
+                        tmp.memory.color = this.computeColor(nodestatus.memory.percent);
+                        tmp.disk.color = this.computeColor(nodestatus.disk.percent);
+                        tmp.net_io.up = sizeFormat(nodestatus.net_io.up);
+                        tmp.net_io.down = sizeFormat(nodestatus.net_io.down);
+                        tmp.net_traffic.sent = sizeFormat(nodestatus.net_traffic.sent);
+                        tmp.net_traffic.recv = sizeFormat(nodestatus.net_traffic.recv);
+                        return tmp;
+                    });
                 },
                 computeColor(percent) {
                     if (percent < 80) {
