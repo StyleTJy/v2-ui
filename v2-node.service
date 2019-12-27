@@ -6,7 +6,7 @@ Wants=network.target
 [Service]
 Type=simple
 ExecStart=/usr/local/v2-node/v2-node
-Restart=Always
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

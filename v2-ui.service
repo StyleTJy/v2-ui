@@ -6,7 +6,7 @@ Wants=network.target
 [Service]
 Type=simple
 ExecStart=/usr/local/v2-ui/v2-ui
-Restart=Always
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
