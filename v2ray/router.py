@@ -70,7 +70,7 @@ def add_customer():
         return jsonify(Msg(False, gettext(str(e))))
     return jsonify(
         Msg(True,
-            gettext(u'Successfully added.')
+            gettext(u'Successfully added')
             )
     )
 
@@ -82,7 +82,7 @@ def del_customer(uuid):
     db.session.commit()
     return jsonify(
         Msg(True,
-            gettext(u'Successfully deleted.')
+            gettext(u'Successfully deleted')
             )
     )
 
@@ -101,7 +101,7 @@ def update_customer(uuid):
     db.session.commit()
     return jsonify(
         Msg(True,
-            gettext(u'Successfully updated.')
+            gettext(u'Successfully updated')
             )
     )
 

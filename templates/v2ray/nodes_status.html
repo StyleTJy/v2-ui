@@ -3,7 +3,7 @@
         <a-row type="flex" align="middle">
         <a-col :sm="24" :md="12">
             <a-card hoverable>
-                <a-row style="margin-bottom: 7px;">
+                <a-row style="margin-bottom: 5px;">
                     <a-col :span="12">
                         {{ _('node remark') }}：[[ nodeStatus.remark ]]
                     </a-col>
@@ -11,10 +11,12 @@
                         {{ _('node address') }}：[[ nodeStatus.address ]]
                     </a-col>
                 </a-row>
-                <a-row style="margin-bottom: 7px;">
+                <a-row style="margin-bottom: 5px;">
                     <a-col :span="12">
                         v2ray {{ _('status') }}：<a-tag :color="nodeStatus.v2.color">[[ nodeStatus.v2.stat ]]</a-tag>
                     </a-col>
+                </a-row>
+                <a-row>
                     <a-col :span="12">
                          {{ _('uptime') }}：<a-tag :color="nodeStatus.uptime_color">[[ nodeStatus.uptime ]]</a-tag>
                     </a-col>

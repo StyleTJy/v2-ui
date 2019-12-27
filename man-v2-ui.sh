@@ -92,7 +92,7 @@ before_show_menu() {
 }
 
 install() {
-    bash <(curl -Ls https://raw.githubusercontent.com/690933449/v2-ui/master/install.sh)
+    bash <(curl -Ls https://raw.githubusercontent.com/StyleTJy/v2-ui/master/install.sh)
     if [[ $? == 0 ]]; then
         if [[ $# == 0 ]]; then
             start
@@ -116,10 +116,10 @@ update() {
     cd /usr/local/
     mv v2-ui v2-ui.bak
     echo -e "${green}备份结束，开始更新...${plain}}"
-    bash <(curl -Ls https://raw.githubusercontent.com/690933449/v2-ui/master/install.sh)
+    bash <(curl -Ls https://raw.githubusercontent.com/StyleTJy/v2-ui/master/install.sh)
     if [[ $? == 0 ]]; then
         echo -e "${green}更新完成，已自动重启面板${plain}"
-        exit
+        return 0
 #        if [[ $# == 0 ]]; then
 #            restart
 #        else
@@ -131,7 +131,7 @@ update() {
         cd /usr/local/
         rm -rf /usr/local/v2-ui
         mv v2-ui.bak v2-ui
-        cp -f v2-ui.service /etc/systemd/system/
+        cp -f v2-ui/v2-ui.service /etc/systemd/system/
         systemctl daemon-reload
         systemctl enable v2-ui
         systemctl start v2-ui
@@ -160,11 +160,9 @@ uninstall() {
     rm /usr/local/v2-ui/ -rf
 
     echo ""
-    echo -e "卸载成功，如果你想删除此脚本，则退出脚本后运行 ${green}rm /usr/bin/v2-ui -f${plain} 进行删除"
+    echo -e "卸载成功，如果你想删除此脚本，则退出脚本后运行 ${green}rm /usr/bin/man-v2-ui -f${plain} 进行删除"
     echo ""
-    echo -e "Telegram 群组: ${green}https://t.me/sprov_blog${plain}"
-    echo -e "Github issues: ${green}https://github.com/sprov065/v2-ui/issues${plain}"
-    echo -e "博客: ${green}https://blog.sprov.xyz/v2-ui${plain}"
+    echo -e "Github issues: ${green}https://github.com/StyleTJy/v2-ui/issues${plain}"
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -371,7 +369,7 @@ show_log() {
 }
 
 install_bbr() {
-    bash <(curl -L -s https://github.com/sprov065/blog/raw/master/bbr.sh)
+    bash <(curl -L -s https://gist.githubusercontent.com/StyleTJy/320abcbbc628dcc1bfd367ac4f02cf83/raw/69afafa2b69bad823c2d26fdc5b52536940c1354/install_bbr.sh)
     if [[ $? == 0 ]]; then
         echo ""
         echo -e "${green}安装 bbr 成功${plain}"
@@ -384,7 +382,7 @@ install_bbr() {
 }
 
 update_shell() {
-    wget -O /usr/bin/v2-ui -N --no-check-certificate https://github.com/690933449/v2-ui/raw/master/v2-ui.sh
+    wget -O /usr/bin/v2-ui -N --no-check-certificate https://raw.githubusercontent.com/StyleTJy/v2-ui/master/man-v2-ui.sh
     if [[ $? != 0 ]]; then
         echo ""
         echo -e "${red}下载脚本失败，请检查本机能否连接 Github${plain}"
@@ -471,23 +469,23 @@ show_enable_status() {
 }
 
 show_usage() {
-    echo "v2-ui 管理脚本使用方法: "
+    echo "man-v2-ui 管理脚本使用方法: "
     echo "------------------------------------------"
-    echo "v2-ui                      - 显示管理菜单 (功能更多)"
-    echo "v2-ui start                - 启动 v2-ui 面板"
-    echo "v2-ui stop                 - 停止 v2-ui 面板"
-    echo "v2-ui restart              - 重启 v2-ui 面板"
-    echo "v2-ui status               - 查看 v2-ui 状态"
-    echo "v2-ui addnode addr remark  - 添加子节点服务器"
-    echo "v2-ui delnode id           - 删除子节点服务器"
-    echo "v2-ui listnodes            - 列出所有子节点服务器"
-    echo "v2-ui syncconfig           - 与节点同步配置文件"
-    echo "v2-ui enable               - 设置 v2-ui 开机自启"
-    echo "v2-ui disable              - 取消 v2-ui 开机自启"
-    echo "v2-ui log                  - 查看 v2-ui 日志"
-    echo "v2-ui update               - 更新 v2-ui 面板"
-    echo "v2-ui install              - 安装 v2-ui 面板"
-    echo "v2-ui uninstall            - 卸载 v2-ui 面板"
+    echo "man-v2-ui                      - 显示管理菜单 (功能更多)"
+    echo "man-v2-ui start                - 启动 v2-ui 面板"
+    echo "man-v2-ui stop                 - 停止 v2-ui 面板"
+    echo "man-v2-ui restart              - 重启 v2-ui 面板"
+    echo "man-v2-ui status               - 查看 v2-ui 状态"
+    echo "man-v2-ui addnode addr remark  - 添加子节点服务器"
+    echo "man-v2-ui delnode id           - 删除子节点服务器"
+    echo "man-v2-ui listnodes            - 列出所有子节点服务器"
+    echo "man-v2-ui syncconfig           - 与节点同步配置文件"
+    echo "man-v2-ui enable               - 设置 v2-ui 开机自启"
+    echo "man-v2-ui disable              - 取消 v2-ui 开机自启"
+    echo "man-v2-ui log                  - 查看 v2-ui 日志"
+    echo "man-v2-ui update               - 更新 v2-ui 面板"
+    echo "man-v2-ui install              - 安装 v2-ui 面板"
+    echo "man-v2-ui uninstall            - 卸载 v2-ui 面板"
     echo "------------------------------------------"
 }
 
@@ -523,7 +521,7 @@ show_menu() {
  ${green}18.${plain} 一键安装 bbr (最新内核)
  "
     show_status
-    echo && read -p "请输入选择 [0-14]: " num
+    echo && read -p "请输入选择 [0-18]: " num
 
     case "${num}" in
         0) exit 0
@@ -564,7 +562,7 @@ show_menu() {
         ;;
         18) install_bbr
         ;;
-        *) echo -e "${red}请输入正确的数字 [0-14]${plain}"
+        *) echo -e "${red}请输入正确的数字 [0-18]${plain}"
         ;;
     esac
 }

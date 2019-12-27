@@ -766,3 +766,12 @@ msgstr "子节点标签"
 
 msgid "node address"
 msgstr "子节点地址"
+
+msgid "Successfully updated"
+msgstr "更新成功"
+
+msgid "Successfully deleted"
+msgstr "删除成功"
+
+msgid "Successfully added"
+msgstr "添加成功"
