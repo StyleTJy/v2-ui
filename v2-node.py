@@ -28,8 +28,8 @@ def handle_data(conn, data):
                 status = server_info.get_status()
                 data = json.dumps(status).encode("utf-8")
                 data_len = struct.pack("!i", len(data))
-                logging.error(data_len)
-                logging.error(data)
+                logging.debug(data_len)
+                logging.debug(data)
                 conn.sendall(data_len)
                 conn.sendall(data)
             except Exception as e:
@@ -77,8 +77,8 @@ def config_changed(conn_socket, filesize):
             recv_len += len(data)
     logging.debug("[I] File receiving done.")
     logging.debug("[I] Restarting v2ray service...")
-    code = -100
     try:
+        code = -100
         p = subprocess.Popen("service v2ray restart", shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         result = p.communicate()
         code = p.returncode

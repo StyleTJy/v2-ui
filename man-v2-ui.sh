@@ -316,6 +316,26 @@ handle_addnode(){
     fi
 }
 
+update_node(){
+    if [[ $# != 2 ]];then
+        echo -e "${red}更新节点失败，参数错误${plain}"
+        return 1
+    else
+        /usr/local/v2-ui/v2-ui updnode $1 $2 $3
+    fi
+}
+
+handle_updnode(){
+    read -p "请输入要更新的节点id，列名（地址(address)或备注(remark)）和值（以空格隔开）: " -a args
+    confirm "要更新节点id为[${args[0]}]的[${args[1]}]列的值为[${args[2]}]" "y"
+    if [[ $? == 0 ]];then
+        updnode ${args[0]} ${args[1]} ${args[2]}
+    fi
+    if [[ $? == 0 ]];then
+        before_show_menu
+    fi
+}
+
 listnodes(){
     /usr/local/v2-ui/v2-ui listnodes
   return $?
@@ -477,6 +497,7 @@ show_usage() {
     echo "man-v2-ui restart              - 重启 v2-ui 面板"
     echo "man-v2-ui status               - 查看 v2-ui 状态"
     echo "man-v2-ui addnode addr remark  - 添加子节点服务器"
+    echo "man-v2-ui updnode id column val- 更新子节点服务器"
     echo "man-v2-ui delnode id           - 删除子节点服务器"
     echo "man-v2-ui listnodes            - 列出所有子节点服务器"
     echo "man-v2-ui syncconfig           - 与节点同步配置文件"
@@ -509,19 +530,20 @@ show_menu() {
   ${green}8.${plain} 停止 v2-ui
   ${green}9.${plain} 重启 v2-ui
  ${green}10.${plain} 添加节点
- ${green}11.${plain} 删除节点
- ${green}12.${plain} 显示已有节点
- ${green}13.${plain} 与节点同步配置文件
- ${green}14.${plain} 查看 v2-ui 状态
- ${green}15.${plain} 查看 v2-ui 日志
+ ${green}11.${plain} 更新节点
+ ${green}12.${plain} 删除节点
+ ${green}13.${plain} 显示已有节点
+ ${green}14.${plain} 与节点同步配置文件
+ ${green}15.${plain} 查看 v2-ui 状态
+ ${green}16.${plain} 查看 v2-ui 日志
 ————————————————
- ${green}16.${plain} 设置 v2-ui 开机自启
- ${green}17.${plain} 取消 v2-ui 开机自启
+ ${green}17.${plain} 设置 v2-ui 开机自启
+ ${green}18.${plain} 取消 v2-ui 开机自启
 ————————————————
- ${green}18.${plain} 一键安装 bbr (最新内核)
+ ${green}19.${plain} 一键安装 bbr (最新内核)
  "
     show_status
-    echo && read -p "请输入选择 [0-18]: " num
+    echo && read -p "请输入选择 [0-19]: " num
 
     case "${num}" in
         0) exit 0
@@ -583,6 +605,8 @@ if [[ $# > 0 ]]; then
         "disable") check_install 0 && disable 0
         ;;
         "addnode") check_install 0 && addnode $2 $3
+        ;;
+        "updnode") check_install 0 && updnode $2 $3 $4
         ;;
         "delnode") check_install 0 && delnode $2
         ;;
