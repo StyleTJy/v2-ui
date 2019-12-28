@@ -144,12 +144,13 @@ install_node(){
     fi
     chmod +rw /etc/v2-node
     last_version=$(curl -Ls "https://api.github.com/repos/StyleTJy/v2-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-    echo -e "检测到v2-ui最新版本：${last_version}，开始安装"
+    echo -e "检测到v2-node最新版本：${last_version}，开始安装"
     wget -N --no-check-certificate -O /usr/local/v2-ui-linux.tar.gz https://github.com/StyleTJy/v2-ui/releases/download/${last_version}/v2-node.tar.gz
     if [[ $? -ne 0 ]]; then
-        echo -e "${red}下载v2-ui失败，请确保你的服务器能够下载Github的文件，如果多次安装失败，请参考手动安装教程${plain}"
+        echo -e "${red}下载v2-node失败，请确保你的服务器能够下载Github的文件，如果多次安装失败，请参考手动安装教程${plain}"
         exit 1
     fi
+    cd /usr/local
     tar zxvf v2-node.tar.gz
     rm v2-node.tar.gz -f
     cd v2-node || return 1
