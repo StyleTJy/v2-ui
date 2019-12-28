@@ -70,6 +70,8 @@ if __name__ == '__main__':
             print('Set port to ' + sys.argv[2] + ' successfully')
         elif sys.argv[1] == 'addnode' and len(sys.argv) == 4:
             cmd2node.node_added(sys.argv[2], sys.argv[3])
+        elif sys.argv[1] == 'updnode' and len(sys.argv) == 5:
+            cmd2node.update_node(sys.argv[2], sys.argv[3], sys.argv[4])
         elif sys.argv[1] == 'delnode' and len(sys.argv) == 3:
             cmd2node.del_node(int(sys.argv[2]))
         elif sys.argv[1] == 'listnodes':
@@ -82,6 +84,8 @@ if __name__ == '__main__':
             print('resetuser:              Reset username and password to \'admin\'')
             print('setport port:           Set port')
             print('addnode address remark: Add node server')
+            print('updnode id column val:  Update <column> with <val> of node server whose id is <id>, column may be ')
+            print('                        [address | remark]')
             print('delnode id:             Remove the node server with id')
             print('listnodes:              List all node servers')
             print('syncconfig:             Sync config file to all node servers')

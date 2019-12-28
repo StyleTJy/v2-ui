@@ -138,7 +138,7 @@ def __cmd2node_init__():
     global initialized
     try:
         config_path = Setting.query.filter_by(key="v2_config_path").first()
-        servers = Server.query.filter(str(Server.remark).lower() != "master").all()
+        servers = Server.query.filter(Server.remark != "master").all()
         maintainers = ThreadPoolExecutor(max_workers=len(servers))
         executors = ThreadPoolExecutor(max_workers=len(servers))
         for svr in servers:
@@ -185,9 +185,20 @@ def node_added(address, remark):
         db.session.add(svr)
         db.session.commit()
         print("done.")
+        print("[I] Please restart v2-ui to establish long-term connection with new node.")
     else:
         print(data)
     cli.close()
+
+
+def update_node(id, column, val):
+    update = {column: val}
+    try:
+        Server.query.filter_by(id=id).update(update)
+        db.session.commit()
+        print("[I] Update node success.")
+    except Exception as e:
+        print("[E] Update node failed: %s" % str(e))
 
 
 def list_nodes():
