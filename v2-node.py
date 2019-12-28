@@ -97,7 +97,7 @@ if __name__ == "__main__":
     logging.basicConfig(filename='/etc/v2-node/v2-node.log',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         format='%(asctime)s-%(name)s-%(levelname)s-%(message)s',
-                        level=logging.DEBUG)
+                        level=logging.WARN)
     schedule_util.start_schedule()
     svr = socket(AF_INET, SOCK_STREAM)
     try:

@@ -27,21 +27,42 @@ python v2-ui.py [ resetconfig | resetuser | setport | addnode address remark | d
 
 
 ## 项目打包
-`pyi-makespec v2-ui.py`
 
-编辑 `v2-ui.spec` 文件中的 `datas` 
-> 参考本项目中的 [v2-ui.spec](v2-ui.spec)
+使用 `deploy.sh` 进行一键预设打包
 
-`pyinstaller v2-ui.spec` 
+```shell script
+sh deploy.sh
+```
 
-`pyinstaller v2-node.py`
+或者使用下面的步骤手动打包
 
-`cp v2-node.service dist/node/`
+1. 生产 `.spec` 文件
+
+    `pyi-makespec v2-ui.py`
+
+    `pyi-makespec v2-node.py`
+
+2. 编辑 `.spec` 文件
+
+    编辑 `v2-ui.spec` 和 `v2-node.spec` 文件中的 `datas` 
+    > 参考本项目中的 [v2-ui.spec](v2-ui.spec) 和 [v2-node.spec](v2-node.spec)
+
+3. 开始打包
+
+    `pyinstaller v2-ui.spec` 
+
+    `pyinstaller v2-node.spec`
 
 ## 安装
 
 ```shell script
 bash <(curl -Ls https://raw.githubusercontent.com/StyleTJy/v2-ui/master/install.sh)
+```
+
+## 卸载
+
+```shell script
+man-v2-ui uninstall
 ```
 
 ## 新增功能
@@ -68,7 +89,7 @@ v2-ui syncconfig           - 与节点同步配置文件
 
 安装：
 
-`sh install.sh node`
+`bash <(curl -Ls https://raw.githubusercontent.com/StyleTJy/v2-ui/master/install_node.sh)`
 
 操作：
 

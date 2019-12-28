@@ -17,7 +17,7 @@ def logging_init():
     logging.basicConfig(filename='/etc/v2-ui/v2-ui.log',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         format='%(asctime)s-%(name)s-%(levelname)s-%(message)s',
-                        level=logging.DEBUG)
+                        level=logging.WARN)
     tornado.log.access_log.setLevel('ERROR')
     tornado.log.app_log.setLevel('ERROR')
     tornado.log.gen_log.setLevel('ERROR')
