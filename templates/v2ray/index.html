@@ -229,6 +229,8 @@
                         tmp.net_io.down = sizeFormat(nodestatus.net_io.down);
                         tmp.net_traffic.sent = sizeFormat(nodestatus.net_traffic.sent);
                         tmp.net_traffic.recv = sizeFormat(nodestatus.net_traffic.recv);
+                        tmp.tcp_count = nodestatus.tcp_count;
+                        tmp.udp_count = nodestatus.udp_count;
                         return tmp;
                     });
                 },
