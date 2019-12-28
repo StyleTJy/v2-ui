@@ -150,7 +150,6 @@ install_node(){
         echo -e "${red}下载v2-node失败，请确保你的服务器能够下载Github的文件，如果多次安装失败，请参考手动安装教程${plain}"
         exit 1
     fi
-    cd /usr/local
     tar zxvf v2-node.tar.gz
     rm v2-node.tar.gz -f
     cd v2-node || return 1
@@ -165,7 +164,7 @@ install_node(){
 echo -e "${green}开始安装${plain}"
 install_base
 install_v2ray
-if [ x"$1" = x"node" ];then
+if [[ x"$1" = x"node" ]];then
     install_node
 else
     install_v2-ui
