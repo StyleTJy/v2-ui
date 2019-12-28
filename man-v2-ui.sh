@@ -111,11 +111,11 @@ update() {
         fi
         return 0
     fi
-    echo -e "${green}开始备份...${plain}}"
+    echo -e "${green}开始备份...${plain}"
     systemctl stop v2-ui
     cd /usr/local/
     mv v2-ui v2-ui.bak
-    echo -e "${green}备份结束，开始更新...${plain}}"
+    echo -e "${green}备份结束，开始更新...${plain}"
     bash <(curl -Ls https://raw.githubusercontent.com/StyleTJy/v2-ui/master/install.sh)
     if [[ $? == 0 ]]; then
         echo -e "${green}更新完成，已自动重启面板${plain}"
@@ -568,23 +568,25 @@ show_menu() {
         ;;
         10) check_install 0 && handle_addnode
         ;;
-        11) check_install 0 && handle_delnode
+        11) check_install 0 && handle_updnode
         ;;
-        12) check_install 0 && handle_listnodes
+        12) check_install 0 && handle_delnode
         ;;
-        13) check_install 0 && handle_sync
+        13) check_install 0 && handle_listnodes
         ;;
-        14) check_install && status
+        14) check_install 0 && handle_sync
         ;;
-        15) check_install && show_log
+        15) check_install && status
         ;;
-        16) check_install && enable
+        16) check_install && show_log
         ;;
-        17) check_install && disable
+        17) check_install && enable
+        ;;
+        18) check_install && disable
         ;;
         18) install_bbr
         ;;
-        *) echo -e "${red}请输入正确的数字 [0-18]${plain}"
+        *) echo -e "${red}请输入正确的数字 [0-19]${plain}"
         ;;
     esac
 }
