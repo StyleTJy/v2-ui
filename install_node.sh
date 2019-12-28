@@ -13,7 +13,7 @@ fi
 
 bash install.sh node
 
-if [[ $? -ne 0]];then
+if [[ $? -ne 0 ]];then
     echo -e "${red}节点安装失败${plain}"
 else
     echo -e "${green}节点安装成功${plain}"
