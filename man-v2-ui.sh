@@ -13,7 +13,7 @@ green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
 
-version="v1.0.0"
+version="v2.0.1"
 
 # check root
 [[ $EUID -ne 0 ]] && echo -e "${red}错误: ${plain} 必须使用root用户运行此脚本！\n" && exit 1
@@ -317,7 +317,7 @@ handle_addnode(){
 }
 
 update_node(){
-    if [[ $# != 2 ]];then
+    if [[ $# != 3 ]];then
         echo -e "${red}更新节点失败，参数错误${plain}"
         return 1
     else
@@ -326,6 +326,7 @@ update_node(){
 }
 
 handle_updnode(){
+    listnodes
     read -p "请输入要更新的节点id，列名（地址(address)或备注(remark)）和值（以空格隔开）: " -a args
     confirm "要更新节点id为[${args[0]}]的[${args[1]}]列的值为[${args[2]}]" "y"
     if [[ $? == 0 ]];then

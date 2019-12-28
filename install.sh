@@ -122,6 +122,7 @@ install_v2-ui() {
     echo -e "man-v2-ui restart              - 重启 v2-ui 面板"
     echo -e "man-v2-ui status               - 查看 v2-ui 状态"
     echo -e "man-v2-ui addnode addr remark  - 添加子节点服务器"
+    echo -e "man-v2-ui updnode id addr remark-更新子节点服务器"
     echo -e "man-v2-ui delnode id           - 删除子节点服务器"
     echo -e "man-v2-ui listnodes            - 列出所有子节点服务器"
     echo -e "man-v2-ui syncconfig           - 与节点同步配置文件"
