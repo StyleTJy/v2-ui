@@ -109,7 +109,7 @@ def get_secret_key():
 
 
 def get_current_version():
-    return '4.8.2'
+    return '4.9.3'
 
 
 def add_if_not_exist(setting, update=False):
