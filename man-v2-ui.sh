@@ -3,9 +3,8 @@
 #======================================================
 #   System Required: CentOS 7+ / Debian 8+ / Ubuntu 16+
 #   Description: Manage v2-ui
-#   Author: sprov
-#   Blog: https://blog.sprov.xyz
-#   Github - v2-ui: https://github.com/sprov065/v2-ui
+#   Author: Style
+#   Github - v2-ui: https://github.com/StyleTJy/v2-ui
 #======================================================
 
 red='\033[0;31m'
@@ -297,19 +296,28 @@ disable() {
 }
 
 addnode(){
-  if [[ $# != 2 ]];then
-      echo -e "${red}添加节点失败，参数错误${plain}"
-      return 1
-  else
-      /usr/local/v2-ui/v2-ui addnode $1 $2
-  fi
+    if [[ $# == 3 ]] && [[ $3 == 1 ]];then
+        /usr/local/v2-ui/v2-ui addnodenoc $1 $2
+    elif [[ $# == 2 ]];then
+        /usr/local/v2-ui/v2-ui addnode $1 $2
+    else
+        echo -e "${red}添加节点失败，参数错误${plain}"
+        return 1
+    fi
 }
 
 handle_addnode(){
+    if [[ $1 == 1 ]];then
+        echo "no-confirm 添加节点"
+    fi
     read -p "请输入要添加的节点地址（域名或者IP）和备注（以空格隔开）: " -a node
     confirm "要添加的节点[${node[0]}(${node[1]})]" "y"
     if [[ $? == 0 ]];then
-        addnode ${node[0]} ${node[1]}
+        if [[ $1 == 1 ]];then
+            addnode ${node[0]} ${node[1]} 1
+        else
+            addnode ${node[0]} ${node[1]}
+        fi
     fi
     if [[ $? == 0 ]];then
         before_show_menu
@@ -498,6 +506,7 @@ show_usage() {
     echo "man-v2-ui restart              - 重启 v2-ui 面板"
     echo "man-v2-ui status               - 查看 v2-ui 状态"
     echo "man-v2-ui addnode addr remark  - 添加子节点服务器"
+    echo "man-v2-ui addnodenoc addr remark- 无验证添加节点"
     echo "man-v2-ui updnode id column val- 更新子节点服务器"
     echo "man-v2-ui delnode id           - 删除子节点服务器"
     echo "man-v2-ui listnodes            - 列出所有子节点服务器"
@@ -530,18 +539,19 @@ show_menu() {
   ${green}7.${plain} 启动 v2-ui
   ${green}8.${plain} 停止 v2-ui
   ${green}9.${plain} 重启 v2-ui
- ${green}10.${plain} 添加节点
- ${green}11.${plain} 更新节点
- ${green}12.${plain} 删除节点
- ${green}13.${plain} 显示已有节点
- ${green}14.${plain} 与节点同步配置文件
- ${green}15.${plain} 查看 v2-ui 状态
- ${green}16.${plain} 查看 v2-ui 日志
+  ${green}10.${plain} 添加节点
+  ${green}11.${plain} no-confirmed 添加节点
+  ${green}12.${plain} 更新节点
+  ${green}13.${plain} 删除节点
+  ${green}14.${plain} 显示已有节点
+  ${green}15.${plain} 与节点同步配置文件
+  ${green}16.${plain} 查看 v2-ui 状态
+  ${green}17.${plain} 查看 v2-ui 日志
 ————————————————
- ${green}17.${plain} 设置 v2-ui 开机自启
- ${green}18.${plain} 取消 v2-ui 开机自启
+  ${green}18.${plain} 设置 v2-ui 开机自启
+  ${green}19.${plain} 取消 v2-ui 开机自启
 ————————————————
- ${green}19.${plain} 一键安装 bbr (最新内核)
+  ${green}20.${plain} 一键安装 bbr (最新内核)
  "
     show_status
     echo && read -p "请输入选择 [0-19]: " num
@@ -569,23 +579,25 @@ show_menu() {
         ;;
         10) check_install 0 && handle_addnode
         ;;
-        11) check_install 0 && handle_updnode
+        11) check_install 0 && handle_addnode 1
         ;;
-        12) check_install 0 && handle_delnode
+        12) check_install 0 && handle_updnode
         ;;
-        13) check_install 0 && handle_listnodes
+        13) check_install 0 && handle_delnode
         ;;
-        14) check_install 0 && handle_sync
+        14) check_install 0 && handle_listnodes
         ;;
-        15) check_install && status
+        15) check_install 0 && handle_sync
         ;;
-        16) check_install && show_log
+        16) check_install && status
         ;;
-        17) check_install && enable
+        17) check_install && show_log
         ;;
-        18) check_install && disable
+        18) check_install && enable
         ;;
-        18) install_bbr
+        19) check_install && disable
+        ;;
+        20) install_bbr
         ;;
         *) echo -e "${red}请输入正确的数字 [0-19]${plain}"
         ;;
@@ -608,6 +620,8 @@ if [[ $# > 0 ]]; then
         "disable") check_install 0 && disable 0
         ;;
         "addnode") check_install 0 && addnode $2 $3
+        ;;
+        "addnodenoc") check_install 0 && addnode $2 $3 1
         ;;
         "updnode") check_install 0 && updnode $2 $3 $4
         ;;

@@ -1,5 +1,3 @@
-中文 | [English](README.en.md)
-
 # 开发人员
 
 ## 开发环境
@@ -74,11 +72,16 @@ man-v2-ui uninstall
 ### 面板操作脚本
 
 ```
-v2-ui addnode addr remark  - 添加子节点服务器
-v2-ui delnode id           - 删除子节点服务器
-v2-ui listnodes            - 列出所有子节点服务器
-v2-ui syncconfig           - 与节点同步配置文件
+man-v2-ui addnode addr remark    - 添加子节点服务器
+man-v2-ui addnodenoc addr remark - 无验证添加节点
+man-v2-ui delnode id             - 删除子节点服务器
+man-v2-ui listnodes              - 列出所有子节点服务器
+man-v2-ui syncconfig             - 与节点同步配置文件
 ```
+
+> 初次安装后务必通过 **无验证添加节点** 添加本机，否则在获取 二维码/URI 的时候无法找到本机节点
+>
+> 另外，务必将本机节点的 remark 设为 master ，否则日志中会一直产生连接超时的报错
 
 ### 子节点监听程序
 

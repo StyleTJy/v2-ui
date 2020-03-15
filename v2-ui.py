@@ -70,6 +70,8 @@ if __name__ == '__main__':
             print('Set port to ' + sys.argv[2] + ' successfully')
         elif sys.argv[1] == 'addnode' and len(sys.argv) == 4:
             cmd2node.node_added(sys.argv[2], sys.argv[3])
+        elif sys.argv[1] == 'addnodenoc' and len(sys.argv) == 4:
+            cmd2node.node_added(sys.argv[2], sys.argv[3], False)
         elif sys.argv[1] == 'updnode' and len(sys.argv) == 5:
             cmd2node.update_node(sys.argv[2], sys.argv[3], sys.argv[4])
         elif sys.argv[1] == 'delnode' and len(sys.argv) == 3:

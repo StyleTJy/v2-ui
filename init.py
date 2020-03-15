@@ -34,11 +34,12 @@ def get_locale():
 
 
 def init_db():
-    from v2ray.models import Inbound
+    from v2ray.models import Inbound, Server
     from base.models import User, Setting
     User.__name__.lower()
     Inbound.__name__.lower()
     Setting.__name__.lower()
+    Server.__name__.lower()
     file_util.mkdirs('/etc/v2-ui/')
     db.create_all()
 

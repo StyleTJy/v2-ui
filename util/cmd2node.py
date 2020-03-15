@@ -165,21 +165,27 @@ def config_changed():
         return True
 
 
-def node_added(address, remark):
-    cli = socket(AF_INET, SOCK_STREAM)
-    try:
-        cli.connect((address, 40001))
-    except Exception as e:
-        print("[E] Adding node server failed: %s" % str(e))
-        return -1
-    header = {"command": "node_added"}
-    header = json.dumps(header)
-    header_len = struct.pack('!i', len(header))
-    cli.send(header_len)
-    cli.send(header.encode("utf-8"))
-    data = cli.recv(1024).decode("utf-8")
-    if data == "ack":
-        print("[I] Confirmed")
+def node_added(address, remark, confirmed=True):
+    response = ""
+    if confirmed:
+        cli = socket(AF_INET, SOCK_STREAM)
+        try:
+            cli.connect((address, 40001))
+        except Exception as e:
+            print("[E] Adding node server failed: %s" % str(e))
+            return -1
+        header = {"command": "node_added"}
+        header = json.dumps(header)
+        header_len = struct.pack('!i', len(header))
+        cli.send(header_len)
+        cli.send(header.encode("utf-8"))
+        response = cli.recv(1024).decode("utf-8")
+        cli.close()
+    else:
+        print("[I] Without confirmed")
+    if response == "ack" or confirmed is False:
+        if confirmed:
+            print("[I] Confirmed")
         print("[I] Adding node: %s(%s)..." % (address, remark), end='')
         svr = Server(address, remark)
         db.session.add(svr)
@@ -187,8 +193,7 @@ def node_added(address, remark):
         print("done.")
         print("[I] Please restart v2-ui to establish long-term connection with new node.")
     else:
-        print(data)
-    cli.close()
+        print(response)
 
 
 def update_node(id, column, val):
