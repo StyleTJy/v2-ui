@@ -338,7 +338,7 @@ handle_updnode(){
     read -p "请输入要更新的节点id，列名（地址(address)或备注(remark)）和值（以空格隔开）: " -a args
     confirm "要更新节点id为[${args[0]}]的[${args[1]}]列的值为[${args[2]}]" "y"
     if [[ $? == 0 ]];then
-        updnode ${args[0]} ${args[1]} ${args[2]}
+        update_node ${args[0]} ${args[1]} ${args[2]}
     fi
     if [[ $? == 0 ]];then
         before_show_menu
