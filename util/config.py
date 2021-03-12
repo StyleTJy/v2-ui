@@ -69,7 +69,7 @@ def get_login_title():
 
 
 def get_v2_config_path():
-    return __get('v2_config_path', '/etc/v2ray/config.json')
+    return __get('v2_config_path', '/usr/local/etc/v2ray/config.json')
 
 
 def get_v2_restart_cmd():
@@ -101,7 +101,7 @@ def get_base_path():
 
 
 def get_v2ctl_cmd_path():
-    return __get('v2ctl_cmd_path', '/usr/bin/v2ray/v2ctl')
+    return __get('v2ctl_cmd_path', '/usr/local/bin/v2ctl')
 
 
 def get_secret_key():
@@ -135,12 +135,12 @@ def init_db(update=False):
     add_if_not_exist(Setting('cert_file', 'cert_file', '', 'text', '', True), update)
     add_if_not_exist(Setting('key_file', 'key_file', '', 'text', '', True), update)
     add_if_not_exist(Setting('login_title', 'login_title', 'Sign in', 'text', '', False), update)
-    add_if_not_exist(Setting('v2_config_path', 'v2_config_path', '/etc/v2ray/config.json', 'text', '', False), update)
+    add_if_not_exist(Setting('v2_config_path', 'v2_config_path', '/usr/local/etc/v2ray/config.json', 'text', '', False), update)
     add_if_not_exist(Setting('v2_template_config', 'v2_template_config', __read_v2_template_config(), 'textarea', '', False), update)
     add_if_not_exist(Setting('v2_config_check_interval', 'v2_config_check_interval', '10', 'int', '', True), update)
     add_if_not_exist(Setting('v2_restart_cmd', 'v2_restart_cmd', 'systemctl restart v2ray', 'text', '', False), update)
     add_if_not_exist(Setting('traffic_job_interval', 'traffic_job_interval', '30', 'int', '', True), update)
-    add_if_not_exist(Setting('v2ctl_cmd_path', 'v2ctl_cmd_path', '/usr/bin/v2ray/v2ctl', 'text', '', True), update)
+    add_if_not_exist(Setting('v2ctl_cmd_path', 'v2ctl_cmd_path', '/usr/local/bin/v2ctl', 'text', '', True), update)
     add_if_not_exist(Setting('secret_key', '', os.urandom(24), 'text', '', True), False)
     db.session.commit()
 

@@ -61,7 +61,7 @@ install_base() {
 
 install_v2ray() {
     echo -e "${green}开始安装or升级v2ray${plain}"
-    bash <(curl -L -s https://install.direct/go.sh)
+    bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
     if [[ $? -ne 0 ]]; then
         echo -e "${red}v2ray安装或升级失败，请检查错误信息${plain}"
         exit 1
